@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BTC Address Query</title>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
+    <style>
+        body {
+            padding: 20px;
+        }
+        #results {
+            margin-top: 20px;
+        }
+        .twitter-links {
+            margin-top: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>BTC Address Query</h2>
+        <div class="form-group">
+            <label for="addresses">Enter BTC addresses (one per line):</label>
+            <textarea id="addresses" class="form-control" rows="10"></textarea>
+        </div>
+        <button class="btn btn-primary" onclick="queryAddresses()">查询</button>
+        <div id="results"></div>
+
+        <div class="twitter-links">
+            <a href="https://twitter.com/ezgod_eth" target="_blank" class="btn btn-info">
+                <i class="fab fa-twitter"></i> @ezgod_eth
+            </a>
+        </div>
+    </div>
+
+    <script>
+        function queryAddresses() {
+            const addresses = document.getElementById('addresses').value.split('\n');
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = ''; // Clear previous results
+
+            addresses.forEach(address => {
+                fetch(`https://www.geniidata.com/api/dashboard/chart/public/data?chartId=156719&pageSize=20&page=1&searchKey=address&searchValue=${address.trim()}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.code === 0 && data.data.listLen > 0) {
+                            const mintCount = data.data.list[0].address_mint_count;
+                            resultsDiv.innerHTML += `<p class="mt-2"><strong>Address:</strong> ${address}, <strong>Address Mint Count:</strong> ${mintCount}</p>`;
+                        } else {
+                            resultsDiv.innerHTML += `<p class="mt-2 text-danger"><strong>Address:</strong> ${address}, Data not found or error occurred.</p>`;
+                        }
+                    })
+                    .catch(error => {
+                        resultsDiv.innerHTML += `<p class="mt-2 text-danger">Error fetching data for address: ${address}</p>`;
+                    });
+            });
+        }
+    </script>
+</body>
+</html>
